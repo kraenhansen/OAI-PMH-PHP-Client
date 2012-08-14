@@ -62,7 +62,7 @@ class OAIPMHClient {
 			} else {
 				$humanReadableQuery = urldecode($query);
 				if(!empty($xml->error)) {
-					throw new OAIPMHException($xml->error . "(query = $humanReadableQuery)");
+					throw new OAIPMHException(strval($xml->error) ." (query = $humanReadableQuery)");
 				} else {
 					printf("Requested: %s\n", $humanReadableQuery);
 					return $xml;
