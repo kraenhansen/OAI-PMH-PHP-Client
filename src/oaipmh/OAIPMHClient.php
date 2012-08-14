@@ -45,6 +45,7 @@ class OAIPMHClient {
 		$query = http_build_query($data);
 		curl_setopt($this->_curlHandle, CURLOPT_POST, true);
 		curl_setopt($this->_curlHandle, CURLOPT_POSTFIELDS, $query);
+		//curl_setopt($this->_curlHandle, CURLOPT_, $query);
 		$response = curl_exec($this->_curlHandle);
 		if($response === false) {
 			throw new RuntimeException("Unsuccessfull response from OAI-PMH service: ".curl_error($this->_curlHandle));
@@ -59,10 +60,11 @@ class OAIPMHClient {
 				}
 				throw new RuntimeException("The OAI-PMH service returned invalid XML: ". implode(', ', $errorStrings));
 			} else {
+				$humanReadableQuery = urldecode($query);
 				if(!empty($xml->error)) {
-					$humanReadableQuery = urldecode($query);
 					throw new OAIPMHException($xml->error . "(query = $humanReadableQuery)");
 				} else {
+					printf("Requested: %s\n", $humanReadableQuery);
 					return $xml;
 				}
 			}
