@@ -9,7 +9,6 @@ class OAIPMHClient {
 		$this->_curlHandle = curl_init($baseURL);
 		curl_setopt($this->_curlHandle, CURLOPT_RETURNTRANSFER, true);
 		$this->_baseURL = $baseURL;
-		$this->sanityCheck();
 	}
 	
 	public function __destruct() {
@@ -160,11 +159,6 @@ class OAIPMHClient {
 		return $this->request(array(
 			'verb' => __FUNCTION__
 		), get_defined_vars());
-	}
-	
-	protected function sanityCheck() {
-		$response = $this->Identify();
-		printf("Repository is '%s' (OAI-PMH version %s)\n", $response->Identify->repositoryName, $response->Identify->protocolVersion);
 	}
 	
 }
