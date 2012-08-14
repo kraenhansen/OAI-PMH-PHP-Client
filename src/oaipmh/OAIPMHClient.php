@@ -1,6 +1,9 @@
 <?php
 namespace oaipmh;
 use \RuntimeException, \SimpleXMLElement;
+
+class OAIPMHException extends RuntimeException {};
+
 class OAIPMHClient {
 	protected $_curlHandle;
 	protected $_baseURL;
@@ -44,13 +47,24 @@ class OAIPMHClient {
 		curl_setopt($this->_curlHandle, CURLOPT_POSTFIELDS, $query);
 		$response = curl_exec($this->_curlHandle);
 		if($response === false) {
-			throw new RuntimeException("Unsuccessfull response from OAI-PMH service: "+curl_error($this->_curlHandle));
+			throw new RuntimeException("Unsuccessfull response from OAI-PMH service: ".curl_error($this->_curlHandle));
 		} else {
 			$xml = simplexml_load_string($response);
 			if($xml === false) {
-				throw new RuntimeException("The OAI-PMH service returned invalid XML.");
+				$errorString = "";
+				$errors = libxml_get_errors();
+				$errorStrings = array();
+				foreach($errors as $error) {
+					$errorStrings[] = sprintf("%s (line %u, column %u)", trim($error->message), $error->line, $error->column);
+				}
+				throw new RuntimeException("The OAI-PMH service returned invalid XML: ". implode(', ', $errorStrings));
 			} else {
-				return $xml;
+				if(!empty($xml->error)) {
+					$humanReadableQuery = urldecode($query);
+					throw new OAIPMHException($xml->error . "(query = $humanReadableQuery)");
+				} else {
+					return $xml;
+				}
 			}
 		}
 	}
