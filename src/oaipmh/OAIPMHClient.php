@@ -50,7 +50,7 @@ class OAIPMHClient {
 		if($response === false) {
 			throw new RuntimeException("Unsuccessfull response from OAI-PMH service: ".curl_error($this->_curlHandle));
 		} else {
-			$xml = simplexml_load_string($response);
+			$xml = @simplexml_load_string($response);
 			if($xml === false) {
 				$errorString = "";
 				$errors = libxml_get_errors();
