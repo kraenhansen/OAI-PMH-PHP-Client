@@ -7,11 +7,13 @@ class OAIPMHException extends RuntimeException {};
 class OAIPMHClient {
 	protected $_curlHandle;
 	protected $_baseURL;
+	protected $_verbose;
 	
-	public function __construct($baseURL) {
+	public function __construct($baseURL, $verbose = false) {
 		$this->_curlHandle = curl_init($baseURL);
 		curl_setopt($this->_curlHandle, CURLOPT_RETURNTRANSFER, true);
 		$this->_baseURL = $baseURL;
+		$this->_verbose = $verbose;
 	}
 	
 	public function __destruct() {
@@ -45,7 +47,12 @@ class OAIPMHClient {
 		$query = http_build_query($data);
 		curl_setopt($this->_curlHandle, CURLOPT_POST, true);
 		curl_setopt($this->_curlHandle, CURLOPT_POSTFIELDS, $query);
-		//curl_setopt($this->_curlHandle, CURLOPT_, $query);
+		
+		$humanReadableQuery = urldecode($query);
+		if($this->_verbose) {
+			printf("Requesting %s\n", $humanReadableQuery);
+		}
+		
 		$response = curl_exec($this->_curlHandle);
 		if($response === false) {
 			throw new RuntimeException("Unsuccessfull response from OAI-PMH service: ".curl_error($this->_curlHandle));
@@ -60,11 +67,9 @@ class OAIPMHClient {
 				}
 				throw new RuntimeException("The OAI-PMH service returned invalid XML: ". implode(', ', $errorStrings));
 			} else {
-				$humanReadableQuery = urldecode($query);
 				if(!empty($xml->error)) {
 					throw new OAIPMHException(strval($xml->error) ." (query = $humanReadableQuery)");
 				} else {
-					printf("Requested: %s\n", $humanReadableQuery);
 					return $xml;
 				}
 			}
