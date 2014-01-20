@@ -65,7 +65,7 @@ class OAIPMHClient {
 				foreach($errors as $error) {
 					$errorStrings[] = sprintf("%s (line %u, column %u)", trim($error->message), $error->line, $error->column);
 				}
-				throw new RuntimeException("The OAI-PMH service returned invalid XML: ". implode(', ', $errorStrings));
+				throw new RuntimeException("The OAI-PMH service returned invalid XML: ". implode(', ', $errorStrings) . "\nOriginal response: " . $response);
 			} else {
 				if(!empty($xml->error)) {
 					throw new OAIPMHException(strval($xml->error) ." (query = $humanReadableQuery)");
